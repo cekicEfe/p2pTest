@@ -12,9 +12,6 @@
 (defconstant +port+ 8008)
 (defconstant +ip+ "192.168.1.121")
 
-(defparameter *test-buffer* (make-array 8 :element-type '(unsigned-byte 8)))
-
-
 (defun main (&key (server nil) )
   (if server
     (tcp:create-server-mlt :port   +port+ 

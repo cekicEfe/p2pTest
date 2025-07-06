@@ -92,8 +92,8 @@
 	(format t "Connected!~%")
 	(usocket:wait-for-input socket)
 	(format t "Input is :~a~%" (read-line stream))
-	(format (usocket:socket-stream socket) "test str back~%")
-	(force-output (usocket:socket-stream socket))
+	(format stream "test str back~%")
+	(force-output stream)
       )
       (progn
 	(format t "Server socket closed~%")
