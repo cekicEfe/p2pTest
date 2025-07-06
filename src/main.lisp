@@ -7,16 +7,21 @@
 (asdf:load-system 'cl-tk)
 (asdf:load-system 'bt-semaphore)
 
-(load "./server/test-tcp.lisp")
+(load "./server/server-tcp.lisp")
 
 (defconstant +port+ 8008)
-(defconstant +ip+ "192.168.1.111")
+(defconstant +ip+ "192.168.1.121")
+
+(defparameter *test-buffer* (make-array 8 :element-type '(unsigned-byte 8)))
+
 
 (defun main (&key (server nil) )
-  (when server 
-    ()
+  (if server
+    (tcp:create-server-mlt :port   +port+ 
+			    :ip     +ip+)
   )
-  (when (= server t)
-    () 
+  (if (not server)
+    (tcp:create-client-mlt :port   +port+
+			    :ip     +ip+)
   )
 )
