@@ -68,17 +68,17 @@
   )
 )
 
-(defun dummy-connection-handler (socket 
-				 connection
-				 stdout)
+(defun dummy-connection-handler (socket connection out)
   (unwind-protect
     (progn
-      (format stdout "Connected!~%")
+      (format out "Connected!~%")
       (format (usocket:socket-stream connection) "test str~%")
       (force-output (usocket:socket-stream connection))
+      (usocket:wait-for-input connection)
+      (format out (read-line (usocket:socket-stream connection)))
     )
     (progn
-      (format stdout "Closing connection~%")
+      (format out "Closing connection~%")
       (usocket:socket-close connection)
     )
   )
@@ -92,6 +92,8 @@
 	(format t "Connected!~%")
 	(usocket:wait-for-input socket)
 	(format t "Input is :~a~%" (read-line stream))
+	(format (usocket:socket-stream socket) "test str back~%")
+	(force-output (usocket:socket-stream socket))
       )
       (progn
 	(format t "Server socket closed~%")
