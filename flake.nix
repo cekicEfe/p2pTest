@@ -21,6 +21,9 @@
                 local-time
                 trivial-main-thread
                 usocket
+                cl-tk
+                ironclad
+                bt-semaphore
               ]))
             pkgs.asdf-vm
             pkgs.roswell
