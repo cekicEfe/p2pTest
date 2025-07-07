@@ -12,15 +12,12 @@
 (defconstant +port+ 8008)
 (defconstant +ip+ "127.0.0.1")
 
-(defun main (&key (server nil) )
-  (if server
-    (tcp:create-server-mlt :port   +port+ 
-			    :ip     +ip+)
-  )
-  (if (not server)
-    (tcp:create-client-mlt :port   +port+
-			    :ip     +ip+)
-  )
+(defun main ( state )
+  (case state
+    (:server (tcp:create-server-mlt :port +port+ :ip +ip+))
+    (:client (tcp:create-client-mlt :port +port+ :ip +ip+))
+    (t (format t "That is sadly not an option exiting ~%"))
+  ) 
 )
 
 

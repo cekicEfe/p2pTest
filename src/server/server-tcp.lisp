@@ -3,48 +3,25 @@
 	:usocket 
 	:local-time
 	:bt-semaphore)
-  (:export #:create-server
-	   #:create-server-mlt
-	   #:create-client
-	   #:create-client-mlt
-	   #:client-test
-	   #:server-test)
+  (:export #:create-server-mlt
+	   #:create-server-test
+	   #:create-client-mlt)
   (:nicknames :tcp))
 
 (in-package :package-server-tcp)
 
-
-(defun create-server (&key port ip)
-  (let* ((socket (usocket:socket-listen ip port))
-	 (connection (usocket:socket-accept socket :element-type
-                     'character)))
-    (unwind-protect
-      (progn
-	(format t "Connected!~%")
-	(format (usocket:socket-stream connection)
-          (progn (read-line)))
-	(force-output (usocket:socket-stream connection)))
-      (progn
-	(format t "Closing sockets~%")
-	(usocket:socket-close connection)
-        (usocket:socket-close socket))
+(defun dummy-connection-handler (connection stream out)
+  (unwind-protect
+    (progn
+      (format out "Connected!~%")
+      (format stream "test str~%")
+      (force-output stream)
+      (usocket:wait-for-input connection)
+      (format out (read-line stream))
     )
-  )
-)
-
-(defun create-client (&key port ip)
-  (usocket:with-client-socket (socket stream ip port
-                                      :element-type 'character)
-    (unwind-protect
-      (progn
-	(format t "Connected!~%")
-        (usocket:wait-for-input socket)
-        (format t "Input is: ~a~%" (read-line stream))
-      )
-      (progn
-	(format t "Server socket closed~%")
-	(usocket:socket-close socket)
-      )
+    (progn
+      (format out "Closing connection~%")
+      (usocket:socket-close connection)
     )
   )
 )
@@ -53,11 +30,16 @@
   (let ((socket (usocket:socket-listen ip port)))
     (unwind-protect
       (loop
-	(let ((connection (usocket:socket-accept socket :element-type 'character))
-	      (top-level-output *standard-output*))
-	  (bt:make-thread (lambda () 
-			    ;; had socket here
-	    (dummy-connection-handler connection top-level-output))
+	(let* ((connection (usocket:socket-accept socket :element-type 'character))
+	       (stream (usocket:socket-stream connection))
+	       (top-level-output *standard-output*))
+	  (bt:make-thread 
+	    (lambda () 
+	      (dummy-connection-handler 
+		connection 
+		stream 
+		top-level-output)
+	    )
 	  ) 
 	)
       )
@@ -65,22 +47,6 @@
 	(usocket:socket-close socket)
 	(format t "Exited gracefully hopefully~%")
       )
-    )
-  )
-)
-;; had socket here
-(defun dummy-connection-handler (connection out)
-  (unwind-protect
-    (progn
-      (format out "Connected!~%")
-      (format (usocket:socket-stream connection) "test str~%")
-      (force-output (usocket:socket-stream connection))
-      (usocket:wait-for-input connection)
-      (format out (read-line (usocket:socket-stream connection)))
-    )
-    (progn
-      (format out "Closing connection~%")
-      (usocket:socket-close connection)
     )
   )
 )
@@ -103,4 +69,3 @@
     )
   )
 )
-
