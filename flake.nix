@@ -11,25 +11,21 @@
       let pkgs = import nixpkgs { inherit system; };
       in {
         devShell = pkgs.mkShell {
-          # Dependencies for project
           buildInputs = [
-            pkgs.glfw
+            pkgs.glfw # Going to need it in the future
             (pkgs.sbcl.withPackages (ps:
               with ps; [
-                #
-                alexandria
-                local-time
-                trivial-main-thread
-                usocket
-                cl-tk
-                ironclad
-                bt-semaphore
+                alexandria # for common functions
+                local-time # for time
+                bt-semaphore # for threads
+                usocket # for tcp/ip
+                ironclad # for encryption
+                cl-gtk4
               ]))
-            pkgs.asdf-vm
-            pkgs.roswell
+            pkgs.asdf-vm # for package management but its redundant
           ];
 
-          #links libraries to shell
+          # Not needed for now
           LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
             #
           ];

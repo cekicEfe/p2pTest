@@ -56,7 +56,8 @@
 	(let ((connection (usocket:socket-accept socket :element-type 'character))
 	      (top-level-output *standard-output*))
 	  (bt:make-thread (lambda () 
-	    (dummy-connection-handler socket connection top-level-output))
+			    ;; had socket here
+	    (dummy-connection-handler connection top-level-output))
 	  ) 
 	)
       )
@@ -67,8 +68,8 @@
     )
   )
 )
-
-(defun dummy-connection-handler (socket connection out)
+;; had socket here
+(defun dummy-connection-handler (connection out)
   (unwind-protect
     (progn
       (format out "Connected!~%")
@@ -92,7 +93,7 @@
 	(format t "Connected!~%")
 	(usocket:wait-for-input socket)
 	(format t "Input is :~a~%" (read-line stream))
-	(format stream "test str back~%")
+	(format stream "stream test~%")
 	(force-output stream)
       )
       (progn

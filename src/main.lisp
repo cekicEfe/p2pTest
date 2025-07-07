@@ -4,13 +4,13 @@
 (asdf:load-system 'local-time)
 (asdf:load-system 'usocket)
 (asdf:load-system 'ironclad)
-(asdf:load-system 'cl-tk)
+(asdf:load-system 'cl-gtk4)
 (asdf:load-system 'bt-semaphore)
 
 (load "./server/server-tcp.lisp")
 
 (defconstant +port+ 8008)
-(defconstant +ip+ "192.168.1.121")
+(defconstant +ip+ "127.0.0.1")
 
 (defun main (&key (server nil) )
   (if server
@@ -22,3 +22,5 @@
 			    :ip     +ip+)
   )
 )
+
+
