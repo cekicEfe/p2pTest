@@ -3,9 +3,8 @@
 	:usocket 
 	:local-time
 	:bt-semaphore)
-  (:export #:create-server-mlt
-	   #:create-server-test
-	   #:create-client-mlt)
+  (:export #:create-server-dummy
+	   #:create-client-dummy)
   (:nicknames :tcp))
 
 (in-package :package-server-tcp)
@@ -17,16 +16,12 @@
       (format stream "test str~%")
       (force-output stream)
       (usocket:wait-for-input connection)
-      (format out (read-line stream))
-    )
+      (format out (read-line stream)))
     (progn
       (format out "Closing connection~%")
-      (usocket:socket-close connection)
-    )
-  )
-)
+      (usocket:socket-close connection))))
 
-(defun create-server-mlt (&key port ip)
+(defun create-server-dummy (&key ip port)
   (let ((socket (usocket:socket-listen ip port)))
     (unwind-protect
       (loop
@@ -38,34 +33,22 @@
 	      (dummy-connection-handler 
 		connection 
 		stream 
-		top-level-output)
-	    )
-	  ) 
-	)
-      )
+		top-level-output)))))
       (progn
 	(usocket:socket-close socket)
-	(format t "Exited gracefully hopefully~%")
-      )
-    )
-  )
-)
+	(format t "Exited gracefully hopefully~%")))))
 
-(defun create-client-mlt (&key port ip)
+(defun create-client-dummy (&key ip port)
   (let* ((socket (usocket:socket-connect ip port :element-type 'character))
-	 (stream (usocket:socket-stream socket )))
+	 (stream (usocket:socket-stream socket)))
     (unwind-protect
       (progn
 	(format t "Connected!~%")
 	(usocket:wait-for-input socket)
 	(format t "Input is :~a~%" (read-line stream))
 	(format stream "stream test~%")
-	(force-output stream)
-      )
+	(force-output stream))
       (progn
 	(format t "Server socket closed~%")
-	(usocket:socket-close socket)
-      )
-    )
-  )
-)
+	(usocket:socket-close socket)))))
+
