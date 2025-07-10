@@ -3,8 +3,8 @@
 	:usocket 
 	:local-time
 	:bt-semaphore)
-  (:export :with-created-lobby
-	   :with-joined-lobby)
+  (:export :create-lobby
+	   :join-lobby)
   (:nicknames :lobby))
 
 (in-package :package-lobby)
@@ -13,36 +13,33 @@
 (defconstant +ip+ "127.0.0.1")
 (defvar *thread-lock* (bt:make-lock))
 
-(defun create-lobby (&key (guest-count-max-supplied 10))
-  (let ((socket (usocket:socket-listen +ip+ +port+))
-	 (guest-count-max guest-count-max-supplied)
-	 (current-guest-count 0)
-	 (last-str ""))
+(defun create-lobby ()
+  (let* ((socket (usocket:socket-listen +ip+ +port+))
+	 (stdout *standard-output*)
+	 (connection (usocket:socket-accept socket :element-type 'character))
+	 (stream (usocket:socket-stream connection)))
     (unwind-protect
-      (loop
-	(let* ((connection (usocket:socket-accept socket :element-type 'character))
-	       (stream (usocket:socket-stream connection)))
-	  (bt:make-thread 
-	    (lambda ()
-	      (usocket:wait-for-input)
-	      ())
-	  )
-	)
-      )
+      (unwind-protect
+	(progn
+	  (format t "Connected !~%")
+	  (usocket:wait-for-input connection)
+	  (format stdout (read-line stream))
+	  (format stdout "~%"))
+	(progn
+	  (usocket:socket-close connection)
+	  (format stdout "Closing connection with peer~%")))
       (progn
 	(usocket:socket-close socket)
 	(format t "---Exited gracefully hopefully---~%")))))
 
-(defun join-lobby (&key ip port)
+(defun join-lobby (&key (ip +ip+) (port +port+))
   (let* ((socket (usocket:socket-connect ip port :element-type 'character))
 	 (stream (usocket:socket-stream socket)))
     (unwind-protect
       (progn
-	(bt:make-thread 
-	  (lambda ()
-	    )
-	)
-      )
+	(format t "Connected !~%")
+	(format stream (read-line))
+	(force-output stream))
       (progn
 	(format t "---Connection closed---~%")
 	(usocket:socket-close socket))))
