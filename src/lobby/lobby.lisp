@@ -22,38 +22,33 @@
 	      (stream (usocket:socket-stream connection)))
 	  (bt:make-thread 
 	    (lambda()
-	      (format stdout "Connected with a peer !~%")
+	      (format stdout "Connected with a peer!~%")
 	      (finish-output)
 	      (unwind-protect
 		(progn
 		  (usocket:wait-for-input connection)
-		  (format stdout (read-line stream))
-		  (finish-output stdout))
+		  (loop :while (listen stream)
+		      :do 
+		    (progn
+		      (write-char (read-char stream))
+		      (finish-output stdout))))
 		(progn
 		  (usocket:socket-close connection)
-		  (format stdout "Closing connection with peer~%"))
-	      )
-	    )
-	  )
-	)
-      )
+		  (format stdout "Closing connection with peer.~%")))))))
       (progn
 	(usocket:socket-close socket)
-	(format t "---Exited gracefully hopefully---~%")
-      )
-    )
-  )
-)
+	(format t "---Exited gracefully---~%")))))
 
 (defun join-lobby (&key (ip +ip+) (port +port+))
   (let* ((socket (usocket:socket-connect ip port :element-type 'character))
 	 (stream (usocket:socket-stream socket)))
     (format t "Connected !~%")
+    (format t "Give input : ")
     (finish-output)
     (unwind-protect
       (progn
 	(format stream (read-line))
-	(finish-output stream))
+	(force-output stream))
       (progn
 	(format t "---Connection closed---~%")
 	(usocket:socket-close socket)))))
