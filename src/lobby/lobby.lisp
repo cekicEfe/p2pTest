@@ -11,7 +11,7 @@
 
 (defconstant +port+ 8008)
 (defconstant +ip+ "127.0.0.1")
-(defvar *thread-lock* (bt:make-lock))
+;;(defvar *thread-lock* (bt:make-lock))
 
 (defun create-lobby ()
   (let* ((socket (usocket:socket-listen +ip+ +port+))
@@ -26,9 +26,10 @@
 	      (finish-output)
 	      (unwind-protect
 		(progn
-		  (usocket:wait-for-input connection)
-		  (write-string (read-line stream))
-		  (finish-output stdout))
+		  (loop
+		    (usocket:wait-for-input connection)
+		    (format stdout "Recieved message : ~a ~%" (read-line stream))
+		    (finish-output stdout)))
 		(progn
 		  (usocket:socket-close connection)
 		  (format stdout "Closing connection with peer.~%")))))))
@@ -40,13 +41,17 @@
   (let* ((socket (usocket:socket-connect ip port :element-type 'character))
 	 (stream (usocket:socket-stream socket)))
     (format t "Connected !~%")
-    (format t "Give input : ")
     (finish-output)
     (unwind-protect
       (progn
-	(format stream (read-line))
-	(force-output stream)
-	(finish-output stream))
+	(loop
+	  (format t "Give input : ")
+	  (finish-output)
+	  (format stream (read-line))
+	  (terpri stream)
+	  (force-output stream)
+	  (format t "~% Message sent ~%")
+	  (finish-output)))
       (progn
 	(format t "---Connection closed---~%")
 	(usocket:socket-close socket)))))
