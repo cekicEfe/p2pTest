@@ -27,11 +27,8 @@
 	      (unwind-protect
 		(progn
 		  (usocket:wait-for-input connection)
-		  (loop :while (listen stream)
-		      :do 
-		    (progn
-		      (write-char (read-char stream))
-		      (finish-output stdout))))
+		  (write-string (read-line stream))
+		  (finish-output stdout))
 		(progn
 		  (usocket:socket-close connection)
 		  (format stdout "Closing connection with peer.~%")))))))
@@ -48,7 +45,8 @@
     (unwind-protect
       (progn
 	(format stream (read-line))
-	(force-output stream))
+	(force-output stream)
+	(finish-output stream))
       (progn
 	(format t "---Connection closed---~%")
 	(usocket:socket-close socket)))))
